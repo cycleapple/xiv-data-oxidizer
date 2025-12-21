@@ -11,7 +11,7 @@ Game data is parsed using the schemas provided by EXDSchema which is included as
 ```
 git clone --recurse-submodules https://github.com/mattantonelli/xiv-data-oxidizer
 cp config.yml.example config.yml
-# Configure the game directory and sheets you want to extract
+# Configure your game directory
 cargo run
 ```
 
