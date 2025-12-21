@@ -6,6 +6,7 @@ use ironworks::{
     excel::{Excel, Language},
     sqpack::{Install, SqPack},
 };
+use regex::Regex;
 
 mod config;
 mod exd_schema;
@@ -27,16 +28,17 @@ fn main() -> Result<(), Box<dyn Error>> {
     let language = Language::English;
     let mut excel = Excel::new(ironworks).with_default_language(language);
 
-    for sheet in config.raw_sheets {
-        export::sheet(&excel, language, &sheet)?;
-    }
-
-    let translated_sheets = config.translated_sheets;
+    // Skip sheets without schemas (quest/, custom/, etc.)
+    let skip_sheet_regex = Regex::new(r"\/").unwrap();
 
     for language in LANGUAGES {
         excel.set_default_language(language);
 
-        for sheet in &translated_sheets {
+        for sheet in excel.list().unwrap().iter() {
+            if skip_sheet_regex.is_match(&sheet) {
+                continue;
+            }
+
             export::sheet(&excel, language, &sheet)?;
         }
     }
