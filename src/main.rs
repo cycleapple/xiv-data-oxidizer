@@ -12,11 +12,9 @@ mod exd_schema;
 mod export;
 mod formatter;
 
-const LANGUAGES: [Language; 4] = [
-    Language::English,
-    Language::German,
-    Language::French,
-    Language::Japanese,
+// Taiwan client uses language code 8 (ChineseTraditionalTW)
+const LANGUAGES: [Language; 1] = [
+    Language::ChineseTraditionalTW,
 ];
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -32,25 +30,33 @@ fn main() -> Result<(), Box<dyn Error>> {
     for language in LANGUAGES {
         excel.set_default_language(language);
 
+        let mut success_count = 0;
+        let mut skip_count = 0;
+
         for sheet in excel.list().unwrap().iter() {
             if skip_sheet_regex.is_match(&sheet) {
                 continue;
             }
 
-            export::sheet(&excel, language, &sheet)?;
+            match export::sheet(&excel, language, &sheet) {
+                Ok(_) => {
+                    success_count += 1;
+                    if success_count % 100 == 0 {
+                        println!("Exported {} sheets...", success_count);
+                    }
+                },
+                Err(e) => {
+                    // Skip sheets that don't have language-specific data
+                    skip_count += 1;
+                    if skip_count <= 10 {
+                        eprintln!("Skipping {}: {}", sheet, e);
+                    }
+                }
+            }
         }
+
+        println!("Completed: {} sheets exported, {} skipped", success_count, skip_count);
     }
-
-    // Quick debugging for schema updates
-
-    // for language in LANGUAGES {
-    //     excel.set_default_language(language);
-    //     export::sheet(&excel, language, &String::from("Mount"))?;
-    // }
-
-    // let language = Language::English;
-    // excel.set_default_language(language);
-    // export::sheet(&excel, language, "Mount")?;
 
     Ok(())
 }

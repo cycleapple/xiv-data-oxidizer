@@ -69,10 +69,12 @@ fn language_code(language: &Language) -> &str {
         Language::German => "de",
         Language::French => "fr",
         Language::Japanese => "ja",
-        Language::Korean => "kr",
+        Language::Korean => "ko",
         Language::ChineseSimplified => "chs",
         Language::ChineseTraditional => "cht",
-        _ => "??",
+        Language::ChineseTraditionalTW => "tc",  // Taiwan client
+        Language::None => "none",
+        _ => "unknown",
     };
 }
 
